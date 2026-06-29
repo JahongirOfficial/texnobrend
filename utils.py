@@ -35,7 +35,12 @@ async def send_with_effect(bot, chat_id, text: str, effect_key: str = None,
         params["reply_markup"] = reply_markup
     if effect_id:
         params["message_effect_id"] = effect_id
-    return await bot.send_message(**params)
+    try:
+        return await bot.send_message(**params)
+    except Exception:
+        if "message_effect_id" in params:
+            del params["message_effect_id"]
+        return await bot.send_message(**params)
 
 
 def fmt_price(price) -> str:
