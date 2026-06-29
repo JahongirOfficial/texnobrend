@@ -113,6 +113,7 @@ async def cb_category(callback: CallbackQuery):
 
 @router.callback_query(F.data.startswith("prod:"))
 async def cb_product(callback: CallbackQuery):
+    import json
     product_id = int(callback.data.split(":")[1])
     product = await db.get_product(product_id)
 
@@ -126,8 +127,33 @@ async def cb_product(callback: CallbackQuery):
         await callback.answer(f"Xatolik: {e}", show_alert=True)
         return
 
+    # Option selection initialization
+    opts = {}
+    if product.get("options"):
+        try:
+            opts = json.loads(product["options"])
+        except Exception:
+            pass
+
+    current_sel = None
+    if opts:
+        current_sel = [0] * len(opts)
+        selected_labels = []
+        keys = list(opts.keys())
+        for idx, key in enumerate(keys):
+            vals = opts[key]
+            selected_labels.append(f"{key.capitalize()}: <b>{vals[0]}</b>")
+        options_text = "⚙️ <b>Tanlangan xususiyatlar:</b>\n" + "\n".join(f"  • {lbl}" for lbl in selected_labels)
+        text += f"\n\n{options_text}"
+
     cat_id = product["category_id"]
-    kb = product_detail_kb(product_id, cat_id)
+    kb = product_detail_kb(
+        product_id,
+        cat_id,
+        added=False,
+        options_json=product.get("options"),
+        current_sel=current_sel
+    )
     image = product["image_file_id"]
 
     await callback.answer()
@@ -148,6 +174,60 @@ async def cb_product(callback: CallbackQuery):
             await callback.message.edit_text(text, reply_markup=kb, parse_mode="HTML")
         except Exception:
             await callback.message.answer(text, reply_markup=kb, parse_mode="HTML")
+
+
+@router.callback_query(F.data.startswith("opt_change:"))
+async def cb_opt_change(callback: CallbackQuery):
+    import json
+    _, product_id, attr_idx, new_indices_str = callback.data.split(":")
+    product_id = int(product_id)
+    current_sel = [int(x) for x in new_indices_str.split("_")]
+    
+    product = await db.get_product(product_id)
+    if not product:
+        await callback.answer("Mahsulot topilmadi", show_alert=True)
+        return
+        
+    text = make_product_text(product)
+    
+    opts = {}
+    if product.get("options"):
+        try:
+            opts = json.loads(product["options"])
+        except Exception:
+            pass
+            
+    if opts:
+        selected_labels = []
+        keys = list(opts.keys())
+        for idx, key in enumerate(keys):
+            vals = opts[key]
+            val_idx = current_sel[idx] if idx < len(current_sel) else 0
+            selected_labels.append(f"{key.capitalize()}: <b>{vals[val_idx]}</b>")
+        options_text = "⚙️ <b>Tanlangan xususiyatlar:</b>\n" + "\n".join(f"  • {lbl}" for lbl in selected_labels)
+        text += f"\n\n{options_text}"
+        
+    kb = product_detail_kb(
+        product_id,
+        product["category_id"],
+        added=False,
+        options_json=product["options"],
+        current_sel=current_sel
+    )
+    
+    await callback.answer()
+    
+    if product["image_file_id"]:
+        try:
+            await callback.message.edit_caption(caption=text, reply_markup=kb, parse_mode="HTML")
+        except Exception:
+            pass
+    else:
+        try:
+            await callback.message.edit_text(text=text, reply_markup=kb, parse_mode="HTML")
+        except Exception:
+            pass
+
 
 
 # ──────────────── search ────────────────

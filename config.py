@@ -20,6 +20,12 @@ DB_PATH = os.getenv("DB_PATH", "texnobrend.db")
 ITEMS_PER_PAGE = int(os.getenv("ITEMS_PER_PAGE", "6"))
 STICKER_FILE = os.getenv("STICKER_FILE", "stickers.json")
 
+# ── To'lov provayderlari (Telegram Invoices) ────────────────────────
+CLICK_PROVIDER_TOKEN = os.getenv("CLICK", "")
+PAYME_PROVIDER_TOKEN = os.getenv("PAYME", "")
+
+
+
 # ── Do'kon ma'lumotlari ───────────────────────────────────────────
 SHOP_NAME    = os.getenv("SHOP_NAME", "Texnobrend")
 CONTACT_PHONE    = os.getenv("CONTACT_PHONE", "+998 90 000 00 00")

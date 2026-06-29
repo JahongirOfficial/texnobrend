@@ -40,6 +40,7 @@ CREATE TABLE IF NOT EXISTS products (
     image_file_id   TEXT DEFAULT '',
     stock           INTEGER DEFAULT 10,
     is_available    INTEGER DEFAULT 1,
+    options         TEXT DEFAULT '',
     created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (category_id) REFERENCES categories(id)
 );
@@ -48,8 +49,9 @@ CREATE TABLE IF NOT EXISTS cart (
     id          INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id     INTEGER NOT NULL,
     product_id  INTEGER NOT NULL,
+    selected_options TEXT DEFAULT '',
     quantity    INTEGER DEFAULT 1,
-    UNIQUE(user_id, product_id)
+    UNIQUE(user_id, product_id, selected_options)
 );
 
 CREATE TABLE IF NOT EXISTS orders (
@@ -102,119 +104,135 @@ SEED_CATEGORIES = [
 
 # 1 product per category with picsum.photos placeholder images
 SEED_PRODUCTS = [
-    # (category_id, name, description, price, old_price, image_file_id, stock)
+    # (category_id, name, description, price, old_price, image_file_id, stock, options)
 
     (1,
      "Samsung Galaxy S24 Ultra",
-     "6.8\" Dynamic AMOLED 2X | Snapdragon 8 Gen 3 | 200MP kamera | 5000mAh | S-Pen | Titanium | 256GB",
+     "6.8\" Dynamic AMOLED 2X | Snapdragon 8 Gen 3 | 200MP kamera | 5000mAh | S-Pen | Titanium",
      15_990_000, 17_000_000,
      "https://picsum.photos/seed/samsung_s24/600/400",
-     6),
+     6,
+     '{"xotira":["256GB","512GB"],"rang":["Yellow","Gray","Black"]}'),
 
     (2,
      "iPhone 15 Pro Max 256GB",
-     "6.7\" Super Retina XDR | A17 Pro chip | 48MP 5x Optik zum | Titan korpus | USB-C | Action tugmasi",
+     "6.7\" Super Retina XDR | A17 Pro chip | 48MP 5x Optik zum | Titan korpus | USB-C",
      14_990_000, 16_500_000,
      "https://picsum.photos/seed/iphone15pro/600/400",
-     8),
+     8,
+     '{"xotira":["256GB","512GB","1TB"],"rang":["Natural","Blue","Black"]}'),
 
     (3,
      "Xiaomi 14 Pro",
-     "6.73\" LTPO AMOLED 120Hz | Snapdragon 8 Gen 3 | Leica 50MP | HyperOS | 4880mAh | 120W zaryadlash",
+     "6.73\" LTPO AMOLED 120Hz | Snapdragon 8 Gen 3 | Leica 50MP | HyperOS | 4880mAh",
      10_490_000, 11_500_000,
      "https://picsum.photos/seed/xiaomi14pro/600/400",
-     9),
+     9,
+     '{"xotira":["256GB","512GB"],"rang":["Yashil","Qora"]}'),
 
     (4,
      "MacBook Air 15\" M3",
-     "15.3\" Liquid Retina | Apple M3 chip | 8GB RAM | 256GB SSD | 18 soat batareya | MagSafe 3 | Wi-Fi 6E",
+     "15.3\" Liquid Retina | Apple M3 chip | 18 soat batareya | MagSafe 3 | Wi-Fi 6E",
      16_990_000, 18_500_000,
      "https://picsum.photos/seed/macbook_m3/600/400",
-     6),
+     6,
+     '{"ram":["8GB","16GB"],"ssd":["256GB","512GB"]}'),
 
     (5,
      "Lenovo LOQ 15\" Gaming",
-     "15.6\" IPS 144Hz | Intel Core i5-12450H | NVIDIA RTX 4050 6GB | 16GB RAM | 512GB SSD | RGB klaviatura",
+     "15.6\" IPS 144Hz | Intel Core i5-12450H | NVIDIA RTX 4050 6GB | RGB klaviatura",
      12_990_000, 14_500_000,
      "https://picsum.photos/seed/lenovo_gaming/600/400",
-     7),
+     7,
+     '{"ram":["16GB","32GB"],"ssd":["512GB","1TB"]}'),
 
     (6,
      "ASUS ROG Zephyrus G14 2024",
-     "14\" QHD+ OLED 165Hz | AMD Ryzen 9 8945HS | RTX 4060 8GB | 32GB RAM | 1TB SSD | AniMe Matrix ekran",
+     "14\" QHD+ OLED 165Hz | AMD Ryzen 9 8945HS | RTX 4060 8GB | AniMe Matrix ekran",
      22_990_000, 25_000_000,
      "https://picsum.photos/seed/asus_rog/600/400",
-     4),
+     4,
+     '{"ram":["16GB","32GB"],"ssd":["1TB","2TB"]}'),
 
     (7,
      "Samsung QLED 4K 55\"",
      "55\" 4K QLED | Quantum Processor 4K | Tizen Smart TV | 120Hz | AirSlim | Gaming Mode | 40W ses",
      12_990_000, 14_500_000,
      "https://picsum.photos/seed/samsung_qled/600/400",
-     8),
+     8,
+     ''),
 
     (8,
      "LG OLED evo C3 55\"",
      "55\" 4K OLED | Alpha9 AI Gen6 | webOS 23 | 120Hz | Dolby Vision IQ | Dolby Atmos | G-Sync | FreeSync",
      19_990_000, 22_000_000,
      "https://picsum.photos/seed/lg_oled/600/400",
-     5),
+     5,
+     ''),
 
     (9,
      "Xiaomi TV A2 Pro 55\"",
      "55\" 4K QLED | 144Hz | MIUI TV | Dolby Vision | HDR10+ | 30W ses | Chromecast | AirPlay 2",
      6_990_000, 7_800_000,
      "https://picsum.photos/seed/xiaomi_tv/600/400",
-     10),
+     10,
+     ''),
 
     (10,
      "Artel Marvarid 250L",
      "No Frost texnologiyasi | A+ energiya sinfi | 250 litr | Tez muzlatish | Antibakterial qoplama | 2 yil kafolat",
      4_490_000, 4_990_000,
      "https://picsum.photos/seed/artel_fridge/600/400",
-     10),
+     10,
+     ''),
 
     (11,
      "Artel Orom 12 (12000 BTU)",
      "Inverter | A+++ energiya sinfi | 12000 BTU | 35 m² xona | Issiq va sovuq | Smart nazorat | Wi-Fi boshqaruv",
      5_990_000, 6_800_000,
      "https://picsum.photos/seed/artel_ac/600/400",
-     10),
+     10,
+     ''),
 
     (12,
      "Artel 7 kg Inverter FL",
      "7 kg | 1200 RPM | Inverter dvigatel | 18 dastur | A++ energiya sinfi | Olddan yuklash | Quruqlash rejimi",
      4_290_000, 4_800_000,
      "https://picsum.photos/seed/artel_wash/600/400",
-     10),
+     10,
+     ''),
 
     (13,
      "Apple AirPods Pro 2 (USB-C)",
      "Faol ANC | Adaptive Audio | Transparency | 30 soat batareya | USB-C | MagSafe | Precision Finding",
      3_290_000, 3_600_000,
      "https://picsum.photos/seed/airpods_pro/600/400",
-     20),
+     20,
+     ''),
 
     (14,
      "Samsung Galaxy Buds3 Pro",
      "Blade dizayn | Intelligent ANC 2.0 | Dolby Atmos | 30 soat batareya | IPX7 suv himoyasi | Hi-Fi audio",
      2_990_000, 3_300_000,
      "https://picsum.photos/seed/galaxy_buds/600/400",
-     18),
+     18,
+     ''),
 
     (15,
      "Apple Watch Series 10 (46mm)",
      "46mm kengaytirilgan Retina | watchOS 11 | S10 SiP | Crash Detection | Sleep Apnea | 50m suv himoyasi",
      6_490_000, 7_200_000,
      "https://picsum.photos/seed/apple_watch/600/400",
-     10),
+     10,
+     ''),
 
     (16,
      "Samsung Galaxy Watch 7 (44mm)",
      "44mm aluminium | Exynos W1000 | BioActive Sensor 3.0 | 40 soat batareya | Sleep coaching | AI salomatlik",
      3_990_000, 4_500_000,
      "https://picsum.photos/seed/galaxy_watch/600/400",
-     12),
+     12,
+     ''),
 ]
 
 
@@ -232,6 +250,7 @@ async def _migrate(db):
     for stmt in [
         "ALTER TABLE products ADD COLUMN image_file_id TEXT DEFAULT ''",
         "ALTER TABLE categories ADD COLUMN brand TEXT DEFAULT ''",
+        "ALTER TABLE products ADD COLUMN options TEXT DEFAULT ''",
     ]:
         try:
             await db.execute(stmt)
@@ -239,15 +258,35 @@ async def _migrate(db):
         except Exception:
             pass
 
+    # Recreate cart table if it lacks selected_options
+    try:
+        async with db.execute("PRAGMA table_info(cart)") as cur:
+            columns = [row[1] for row in await cur.fetchall()]
+        if "selected_options" not in columns:
+            await db.execute("DROP TABLE IF EXISTS cart")
+            await db.execute("""
+                CREATE TABLE IF NOT EXISTS cart (
+                    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+                    user_id     INTEGER NOT NULL,
+                    product_id  INTEGER NOT NULL,
+                    selected_options TEXT DEFAULT '',
+                    quantity    INTEGER DEFAULT 1,
+                    UNIQUE(user_id, product_id, selected_options)
+                )
+            """)
+            await db.commit()
+    except Exception:
+        pass
+
 
 async def _seed(db):
-    """Re-seeds categories+products when seed_version != '2'."""
+    """Re-seeds categories+products when seed_version != '3'."""
     try:
         async with db.execute(
             "SELECT value FROM settings WHERE key='seed_version'"
         ) as cur:
             row = await cur.fetchone()
-        if row and row[0] == "2":
+        if row and row[0] == "3":
             return
     except Exception:
         pass
@@ -260,15 +299,15 @@ async def _seed(db):
     )
     await db.executemany(
         "INSERT INTO products "
-        "(category_id, name, description, price, old_price, image_file_id, stock) "
-        "VALUES (?,?,?,?,?,?,?)",
+        "(category_id, name, description, price, old_price, image_file_id, stock, options) "
+        "VALUES (?,?,?,?,?,?,?,?)",
         SEED_PRODUCTS,
     )
     await db.execute(
         "INSERT OR IGNORE INTO settings (key, value) VALUES ('global_discount', '0')"
     )
     await db.execute(
-        "INSERT OR REPLACE INTO settings (key, value) VALUES ('seed_version', '2')"
+        "INSERT OR REPLACE INTO settings (key, value) VALUES ('seed_version', '3')"
     )
     await db.commit()
 
@@ -569,12 +608,12 @@ async def delete_product(product_id):
 
 # ──────────────────────────── CART ────────────────────────────
 
-async def cart_add(user_id, product_id):
+async def cart_add(user_id, product_id, selected_options=''):
     async with aiosqlite.connect(DB_PATH) as db:
         await db.execute(
-            "INSERT INTO cart (user_id, product_id, quantity) VALUES (?,?,1) "
-            "ON CONFLICT(user_id, product_id) DO UPDATE SET quantity=quantity+1",
-            (user_id, product_id),
+            "INSERT INTO cart (user_id, product_id, selected_options, quantity) VALUES (?,?,?,1) "
+            "ON CONFLICT(user_id, product_id, selected_options) DO UPDATE SET quantity=quantity+1",
+            (user_id, product_id, selected_options),
         )
         await db.commit()
 
@@ -583,17 +622,18 @@ async def cart_get(user_id):
     async with aiosqlite.connect(DB_PATH) as db:
         db.row_factory = aiosqlite.Row
         async with db.execute(
-            "SELECT c.*, p.name, p.price, p.old_price, p.image_file_id "
+            "SELECT c.*, p.name, p.price, p.old_price, p.image_file_id, p.stock "
             "FROM cart c JOIN products p ON c.product_id=p.id WHERE c.user_id=?",
             (user_id,),
         ) as cur:
             return await cur.fetchall()
 
 
-async def cart_remove(user_id, product_id):
+async def cart_remove(user_id, product_id, selected_options=''):
     async with aiosqlite.connect(DB_PATH) as db:
         await db.execute(
-            "DELETE FROM cart WHERE user_id=? AND product_id=?", (user_id, product_id)
+            "DELETE FROM cart WHERE user_id=? AND product_id=? AND selected_options=?",
+            (user_id, product_id, selected_options)
         )
         await db.commit()
 
@@ -604,18 +644,35 @@ async def cart_clear(user_id):
         await db.commit()
 
 
-async def cart_set_qty(user_id, product_id, qty):
+async def cart_set_qty(user_id, product_id, qty, selected_options=''):
     async with aiosqlite.connect(DB_PATH) as db:
         if qty <= 0:
             await db.execute(
-                "DELETE FROM cart WHERE user_id=? AND product_id=?", (user_id, product_id)
+                "DELETE FROM cart WHERE user_id=? AND product_id=? AND selected_options=?",
+                (user_id, product_id, selected_options)
             )
         else:
             await db.execute(
-                "UPDATE cart SET quantity=? WHERE user_id=? AND product_id=?",
-                (qty, user_id, product_id),
+                "UPDATE cart SET quantity=? WHERE user_id=? AND product_id=? AND selected_options=?",
+                (qty, user_id, product_id, selected_options),
             )
         await db.commit()
+
+
+async def cart_remove_by_id(user_id, cart_id):
+    async with aiosqlite.connect(DB_PATH) as db:
+        await db.execute("DELETE FROM cart WHERE user_id=? AND id=?", (user_id, cart_id))
+        await db.commit()
+
+
+async def cart_set_qty_by_id(user_id, cart_id, qty):
+    async with aiosqlite.connect(DB_PATH) as db:
+        if qty <= 0:
+            await db.execute("DELETE FROM cart WHERE user_id=? AND id=?", (user_id, cart_id))
+        else:
+            await db.execute("UPDATE cart SET quantity=? WHERE user_id=? AND id=?", (qty, user_id, cart_id))
+        await db.commit()
+
 
 
 # ──────────────────────────── ORDERS ────────────────────────────
@@ -635,7 +692,13 @@ async def create_order(user_id, phone, address, note):
             "INSERT INTO order_items (order_id, product_id, name, quantity, price) "
             "VALUES (?,?,?,?,?)",
             [
-                (order_id, i["product_id"], i["name"], i["quantity"], i["price"])
+                (
+                    order_id,
+                    i["product_id"],
+                    f"{i['name']} ({i['selected_options']})" if i.get("selected_options") else i["name"],
+                    i["quantity"],
+                    i["price"]
+                )
                 for i in items
             ],
         )

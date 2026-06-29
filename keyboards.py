@@ -112,18 +112,64 @@ def products_kb(products, category_id, page, total, per_page, brand=None):
 
 
 
-def product_detail_kb(product_id, cat_id, added=False):
+def product_detail_kb(product_id, cat_id, added=False, options_json=None, current_sel=None):
+    import json
     builder = InlineKeyboardBuilder()
+
+    # Parse options if present
+    opts = {}
+    if options_json:
+        try:
+            opts = json.loads(options_json)
+        except Exception:
+            pass
+
+    # If options exist, generate selection buttons
+    if opts and isinstance(opts, dict):
+        keys = list(opts.keys())
+        if current_sel is None:
+            current_sel = [0] * len(keys)
+        
+        # Add a button for each attribute to toggle values
+        for i, key in enumerate(keys):
+            values = opts[key]
+            if not isinstance(values, list) or not values:
+                continue
+            curr_idx = current_sel[i] if i < len(current_sel) else 0
+            next_idx = (curr_idx + 1) % len(values)
+            
+            # Create a list representing the selection if we click this button
+            new_sel = list(current_sel)
+            if i < len(new_sel):
+                new_sel[i] = next_idx
+            new_sel_str = "_".join(map(str, new_sel))
+            
+            label = f"{key.capitalize()}: {values[curr_idx]}"
+            # Emoji decoration
+            emoji = "🎨" if "rang" in key.lower() or "color" in key.lower() else "⚙️"
+            builder.row(
+                _b(f"{emoji} {label}", f"opt_change:{product_id}:{i}:{new_sel_str}")
+            )
+            
+        current_sel_str = "_".join(map(str, current_sel))
+        add_cd = f"cart_add:{product_id}:{current_sel_str}"
+        fast_cd = f"fast_order:{product_id}:{current_sel_str}"
+    else:
+        add_cd = f"cart_add:{product_id}"
+        fast_cd = f"fast_order:{product_id}"
+
+    # Add to cart row
     if added:
         builder.row(
-            _b("✅ Savatga qo'shildi", f"cart_add:{product_id}", style=ButtonStyle.PRIMARY),
+            _b("✅ Savatga qo'shildi", add_cd, style=ButtonStyle.PRIMARY),
         )
     else:
         builder.row(
-            _b("🛒 Savatga qo'shish", f"cart_add:{product_id}", style=ButtonStyle.SUCCESS),
+            _b("🛒 Savatga qo'shish", add_cd, style=ButtonStyle.SUCCESS),
         )
+        
     builder.row(
-        _b("⚡ Tez buyurtma", f"fast_order:{product_id}", style=ButtonStyle.PRIMARY),
+        _b("⚡ Tez buyurtma", fast_cd, style=ButtonStyle.PRIMARY),
     )
     builder.row(
         _b("◀️ Orqaga", f"cat:{cat_id}:1"),
@@ -133,15 +179,33 @@ def product_detail_kb(product_id, cat_id, added=False):
 
 
 
+
 # ──────────────── cart ────────────────
 
-def cart_kb(has_items=True):
+def cart_kb(has_items=True, items=None):
     builder = InlineKeyboardBuilder()
-    if has_items:
+    if items:
+        for item in items:
+            cart_id = item["id"]
+            name = item["name"]
+            if item.get("selected_options"):
+                name += f" ({item['selected_options']})"
+            qty = item["quantity"]
+            builder.row(_b(f"📦 {name}", "noop"))
+            builder.row(
+                _b("➖", f"qty_dec:{cart_id}"),
+                _b(f"{qty} ta", "noop"),
+                _b("➕", f"qty_inc:{cart_id}"),
+                _b("🗑 O'chirish", f"cart_remove:{cart_id}", style=ButtonStyle.DANGER)
+            )
+        builder.row(_b("✅ Buyurtma berish", "checkout", style=ButtonStyle.SUCCESS))
+        builder.row(_b("🗑 Savatni tozalash", "cart_clear", style=ButtonStyle.DANGER))
+    elif has_items:
         builder.row(_b("✅ Buyurtma berish", "checkout", style=ButtonStyle.SUCCESS))
         builder.row(_b("🗑 Savatni tozalash", "cart_clear", style=ButtonStyle.DANGER))
     builder.row(_b("🛒 Mahsulotlar", "all_categories"), _b("🏠 Bosh menyu", "main_menu"))
     return builder.as_markup()
+
 
 
 def cart_item_kb(product_id, qty):
