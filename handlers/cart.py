@@ -466,7 +466,7 @@ async def pay_invoice(callback: CallbackQuery):
     
     total_price = order["total_price"]
     prices = [
-        LabeledPrice(label=f"Buyurtma #{order_id}", amount=total_price)
+        LabeledPrice(label=f"Buyurtma #{order_id}", amount=total_price * 100)
     ]
     
     try:
@@ -523,7 +523,7 @@ async def on_successful_payment(message: Message):
                     admin_id,
                     f"💳 <b>Buyurtma #{order_id} to'landi!</b>\n\n"
                     f"Foydalanuvchi: {message.from_user.full_name}\n"
-                    f"To'langan summa: {fmt_price(message.successful_payment.total_amount)} so'm",
+                    f"To'langan summa: {fmt_price(message.successful_payment.total_amount // 100)} so'm",
                     parse_mode="HTML"
                 )
             except Exception:
