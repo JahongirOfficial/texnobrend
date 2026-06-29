@@ -23,7 +23,7 @@ async def _show_cart(target, user_id: int):
         total = sum(i["price"] * i["quantity"] for i in items)
         lines = ["🛍 <b>Sizning savatchangiz:</b>\n"]
         for i in items:
-            name = f"{i['name']} ({i['selected_options']})" if i.get("selected_options") else i["name"]
+            name = f"{i['name']} ({i['selected_options']})" if i["selected_options"] else i["name"]
             lines.append(
                 f"• {name}\n"
                 f"  {fmt_price(i['price'])} × {i['quantity']} = "
@@ -67,16 +67,17 @@ async def cb_cart_add(callback: CallbackQuery):
     if not product:
         await callback.answer("Mahsulot topilmadi", show_alert=True)
         return
-    if not product["stock"]:
+    product_dict = dict(product)
+    if not product_dict["stock"]:
         await callback.answer("❌ Bu mahsulot mavjud emas", show_alert=True)
         return
 
     # Parse and format option selections
     selected_opts_label = ""
     current_sel = None
-    if indices_str and product.get("options"):
+    if indices_str and product_dict.get("options"):
         try:
-            opts = json.loads(product["options"])
+            opts = json.loads(product_dict["options"])
             current_sel = [int(x) for x in indices_str.split("_")]
             selected_labels = []
             keys = list(opts.keys())
@@ -96,9 +97,9 @@ async def cb_cart_add(callback: CallbackQuery):
             current_qty = item["quantity"]
             break
 
-    if current_qty + 1 > product["stock"]:
+    if current_qty + 1 > product_dict["stock"]:
         await callback.answer(
-            f"❌ Omborda atigi {product['stock']} ta mahsulot bor! Savatchangizga ko'proq qo'shib bo'lmaydi.",
+            f"❌ Omborda atigi {product_dict['stock']} ta mahsulot bor! Savatchangizga ko'proq qo'shib bo'lmaydi.",
             show_alert=True
         )
         return
@@ -106,13 +107,13 @@ async def cb_cart_add(callback: CallbackQuery):
     await db.cart_add(callback.from_user.id, product_id, selected_opts_label)
     
     # Dynamically change the button state to "✅ Savatga qo'shildi" (blue)
-    cat_id = product["category_id"]
+    cat_id = product_dict["category_id"]
     from keyboards import product_detail_kb
     import asyncio
     
     try:
         await callback.message.edit_reply_markup(
-            reply_markup=product_detail_kb(product_id, cat_id, added=True, options_json=product.get("options"), current_sel=current_sel)
+            reply_markup=product_detail_kb(product_id, cat_id, added=True, options_json=product_dict.get("options"), current_sel=current_sel)
         )
     except Exception:
         pass
@@ -125,7 +126,7 @@ async def cb_cart_add(callback: CallbackQuery):
     # Restore the button state back to "🛒 Savatga qo'shish" (green)
     try:
         await callback.message.edit_reply_markup(
-            reply_markup=product_detail_kb(product_id, cat_id, added=False, options_json=product.get("options"), current_sel=current_sel)
+            reply_markup=product_detail_kb(product_id, cat_id, added=False, options_json=product_dict.get("options"), current_sel=current_sel)
         )
     except Exception:
         pass
@@ -142,15 +143,19 @@ async def cb_fast_order(callback: CallbackQuery, state: FSMContext):
     indices_str = parts[2] if len(parts) > 2 else ""
 
     product = await db.get_product(product_id)
-    if not product or not product["stock"]:
+    if not product:
+        await callback.answer("❌ Mahsulot mavjud emas", show_alert=True)
+        return
+    product_dict = dict(product)
+    if not product_dict["stock"]:
         await callback.answer("❌ Mahsulot mavjud emas", show_alert=True)
         return
 
     # Parse options
     selected_opts_label = ""
-    if indices_str and product.get("options"):
+    if indices_str and product_dict.get("options"):
         try:
-            opts = json.loads(product["options"])
+            opts = json.loads(product_dict["options"])
             current_sel = [int(x) for x in indices_str.split("_")]
             selected_labels = []
             keys = list(opts.keys())

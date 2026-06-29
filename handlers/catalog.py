@@ -129,9 +129,10 @@ async def cb_product(callback: CallbackQuery):
 
     # Option selection initialization
     opts = {}
-    if product.get("options"):
+    product_dict = dict(product)
+    if product_dict.get("options"):
         try:
-            opts = json.loads(product["options"])
+            opts = json.loads(product_dict["options"])
         except Exception:
             pass
 
@@ -151,7 +152,7 @@ async def cb_product(callback: CallbackQuery):
         product_id,
         cat_id,
         added=False,
-        options_json=product.get("options"),
+        options_json=product_dict.get("options"),
         current_sel=current_sel
     )
     image = product["image_file_id"]
@@ -191,9 +192,10 @@ async def cb_opt_change(callback: CallbackQuery):
     text = make_product_text(product)
     
     opts = {}
-    if product.get("options"):
+    product_dict = dict(product)
+    if product_dict.get("options"):
         try:
-            opts = json.loads(product["options"])
+            opts = json.loads(product_dict["options"])
         except Exception:
             pass
             
