@@ -82,7 +82,7 @@ async def main():
             logger.warning(f"Admin notify failed ({admin_id}): {e}")
 
     logger.info("Bot polling started. Press Ctrl+C to stop.")
-    await dp.start_polling(bot, skip_updates=True)
+    await dp.start_polling(bot, skip_updates=True, allowed_updates=dp.resolve_used_update_types())
 
 
 if __name__ == "__main__":
