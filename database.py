@@ -289,6 +289,15 @@ async def _migrate(db):
 async def _seed(db):
     """Re-seeds categories+products when seed_version != '3'."""
     try:
+        # Double-safety check: If database already has categories, do not re-seed!
+        async with db.execute("SELECT COUNT(*) FROM categories") as cur:
+            cnt = (await cur.fetchone())[0]
+            if cnt > 0:
+                return
+    except Exception:
+        pass
+
+    try:
         async with db.execute(
             "SELECT value FROM settings WHERE key='seed_version'"
         ) as cur:
