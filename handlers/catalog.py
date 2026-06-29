@@ -127,14 +127,14 @@ async def cb_product(callback: CallbackQuery):
         await callback.answer(f"Xatolik: {e}", show_alert=True)
         return
 
-    # Option selection initialization
+    # Option selection initialization (temporarily disabled as per user request)
     opts = {}
     product_dict = dict(product)
-    if product_dict.get("options"):
-        try:
-            opts = json.loads(product_dict["options"])
-        except Exception:
-            pass
+    # if product_dict.get("options"):
+    #     try:
+    #         opts = json.loads(product_dict["options"])
+    #     except Exception:
+    #         pass
 
     current_sel = None
     if opts:
@@ -193,11 +193,11 @@ async def cb_opt_change(callback: CallbackQuery):
     
     opts = {}
     product_dict = dict(product)
-    if product_dict.get("options"):
-        try:
-            opts = json.loads(product_dict["options"])
-        except Exception:
-            pass
+    # if product_dict.get("options"):
+    #     try:
+    #         opts = json.loads(product_dict["options"])
+    #     except Exception:
+    #         pass
             
     if opts:
         selected_labels = []

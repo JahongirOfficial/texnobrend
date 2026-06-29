@@ -116,13 +116,13 @@ def product_detail_kb(product_id, cat_id, added=False, options_json=None, curren
     import json
     builder = InlineKeyboardBuilder()
 
-    # Parse options if present
+    # Parse options if present (temporarily disabled as per user request)
     opts = {}
-    if options_json:
-        try:
-            opts = json.loads(options_json)
-        except Exception:
-            pass
+    # if options_json:
+    #     try:
+    #         opts = json.loads(options_json)
+    #     except Exception:
+    #         pass
 
     # If options exist, generate selection buttons
     if opts and isinstance(opts, dict):
