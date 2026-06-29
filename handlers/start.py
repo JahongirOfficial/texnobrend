@@ -14,6 +14,13 @@ from states import Calculator
 
 router = Router()
 
+
+@router.message(F.text == "❌ Bekor qilish")
+async def global_cancel(message: Message, state: FSMContext):
+    await state.clear()
+    await message.answer("❌ Bekor qilindi.", reply_markup=main_menu_kb())
+
+
 # ──────────────── subscription check helper ────────────────
 
 async def is_subscribed(bot, user_id: int) -> bool:

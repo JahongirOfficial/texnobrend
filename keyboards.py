@@ -188,7 +188,7 @@ def cart_kb(has_items=True, items=None):
         for item in items:
             cart_id = item["id"]
             name = item["name"]
-            if item.get("selected_options"):
+            if item["selected_options"]:
                 name += f" ({item['selected_options']})"
             qty = item["quantity"]
             builder.row(_b(f"📦 {name}", "noop"))
