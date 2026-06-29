@@ -68,7 +68,32 @@ async def cb_cart_add(callback: CallbackQuery):
         return
 
     await db.cart_add(callback.from_user.id, product_id)
-    await callback.answer(f"✅ {product['name']} savatga qo'shildi!", show_alert=False)
+    
+    # Dynamically change the button state to "✅ Savatga qo'shildi" (blue)
+    cat_id = product["category_id"]
+    from keyboards import product_detail_kb
+    import asyncio
+    
+    try:
+        await callback.message.edit_reply_markup(
+            reply_markup=product_detail_kb(product_id, cat_id, added=True)
+        )
+    except Exception:
+        pass
+    
+    await callback.answer()
+    
+    # Wait 1 second
+    await asyncio.sleep(1)
+    
+    # Restore the button state back to "🛒 Savatga qo'shish" (green)
+    try:
+        await callback.message.edit_reply_markup(
+            reply_markup=product_detail_kb(product_id, cat_id, added=False)
+        )
+    except Exception:
+        pass
+
 
 
 # ──────────────── fast order ────────────────

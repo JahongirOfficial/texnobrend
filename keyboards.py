@@ -112,11 +112,16 @@ def products_kb(products, category_id, page, total, per_page, brand=None):
 
 
 
-def product_detail_kb(product_id, cat_id):
+def product_detail_kb(product_id, cat_id, added=False):
     builder = InlineKeyboardBuilder()
-    builder.row(
-        _b("🛒 Savatga qo'shish", f"cart_add:{product_id}", style=ButtonStyle.SUCCESS),
-    )
+    if added:
+        builder.row(
+            _b("✅ Savatga qo'shildi", f"cart_add:{product_id}", style=ButtonStyle.PRIMARY),
+        )
+    else:
+        builder.row(
+            _b("🛒 Savatga qo'shish", f"cart_add:{product_id}", style=ButtonStyle.SUCCESS),
+        )
     builder.row(
         _b("⚡ Tez buyurtma", f"fast_order:{product_id}", style=ButtonStyle.PRIMARY),
     )
@@ -125,6 +130,7 @@ def product_detail_kb(product_id, cat_id):
         _b("🏠 Bosh menyu", "main_menu"),
     )
     return builder.as_markup()
+
 
 
 # ──────────────── cart ────────────────
