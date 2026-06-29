@@ -695,7 +695,7 @@ async def create_order(user_id, phone, address, note):
                 (
                     order_id,
                     i["product_id"],
-                    f"{i['name']} ({i['selected_options']})" if i.get("selected_options") else i["name"],
+                    f"{i['name']} ({i['selected_options']})" if i["selected_options"] else i["name"],
                     i["quantity"],
                     i["price"]
                 )
