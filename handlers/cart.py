@@ -17,11 +17,11 @@ router = Router()
 async def _show_cart(target, user_id: int):
     items = await db.cart_get(user_id)
     if not items:
-        text = "🛍 <b>Savatingiz bo'sh</b>\n\nMahsulotlar bo'limidan qo'shing."
+        text = "🛒 <b>Savatingiz hozircha bo'sh</b>\n\nDo'konimizdagi eng so'nggi gadjetlarni ko'rish va savatchaga qo'shish uchun «🛒 Mahsulotlar» bo'limiga o'ting."
         kb = cart_kb(has_items=False)
     else:
         total = sum(i["price"] * i["quantity"] for i in items)
-        lines = ["🛍 <b>Sizning savatchangiz:</b>\n"]
+        lines = ["🛒 <b>Sizning savatchangiz tarkibi:</b>\n"]
         for i in items:
             name = f"{i['name']} ({i['selected_options']})" if i["selected_options"] else i["name"]
             lines.append(
@@ -29,7 +29,7 @@ async def _show_cart(target, user_id: int):
                 f"  {fmt_price(i['price'])} × {i['quantity']} = "
                 f"<b>{fmt_price(i['price'] * i['quantity'])} so'm</b>"
             )
-        lines.append(f"\n💰 <b>Jami: {fmt_price(total)} so'm</b>")
+        lines.append(f"\n💰 <b>Jami summa: {fmt_price(total)} so'm</b>")
         text = "\n".join(lines)
         kb = cart_kb(has_items=True, items=items)
 
@@ -253,8 +253,8 @@ async def cb_checkout(callback: CallbackQuery, state: FSMContext):
 
     await state.set_state(Checkout.phone)
     await callback.message.answer(
-        "📦 <b>Buyurtma rasmiylashtirish</b>\n\n"
-        "1️⃣ Telefon raqamingizni yuboring:",
+        "📦 <b>Buyurtmani rasmiylashtirish (1/3-bosqich)</b>\n\n"
+        "📞 Iltimos, telefon raqamingizni kiriting yoki quyidagi <b>«📱 Raqamni yuborish»</b> tugmasi orqali yuboring:",
         reply_markup=checkout_phone_kb(),
         parse_mode="HTML",
     )
@@ -266,7 +266,7 @@ async def cb_checkout(callback: CallbackQuery, state: FSMContext):
 async def checkout_phone(message: Message, state: FSMContext):
     if message.text == "❌ Bekor qilish":
         await state.clear()
-        await message.answer("❌ Bekor qilindi.", reply_markup=main_menu_kb())
+        await message.answer("❌ Buyurtma bekor qilindi.", reply_markup=main_menu_kb())
         return
 
     if message.contact:
@@ -274,15 +274,16 @@ async def checkout_phone(message: Message, state: FSMContext):
     elif message.text and (message.text.startswith("+") or message.text.isdigit()):
         phone = message.text.strip()
     else:
-        await message.answer("❌ Iltimos, telefon raqamingizni yuboring yoki kiriting:")
+        await message.answer("⚠️ Iltimos, telefon raqamingizni kiriting yoki pastdagi tugmani bosing:")
         return
 
     await state.update_data(phone=phone)
     await db.update_user_phone(message.from_user.id, phone)
     await state.set_state(Checkout.address)
     await message.answer(
-        "2️⃣ Yetkazib berish manzilingizni kiriting:\n"
-        "<i>Misol: Toshkent sh., Yunusobod tumani, Amir Temur ko'chasi 10-uy</i>",
+        "📦 <b>Buyurtmani rasmiylashtirish (2/3-bosqich)</b>\n\n"
+        "📍 Yetkazib berish manzilingizni to'liq kiriting:\n"
+        "<i>(Masalan: Toshkent sh., Chilonzor tumani, Bunyodkor ko'chasi 1A-uy, 12-xonadon)</i>",
         reply_markup=cancel_kb(),
         parse_mode="HTML",
     )
@@ -292,14 +293,15 @@ async def checkout_phone(message: Message, state: FSMContext):
 async def checkout_address(message: Message, state: FSMContext):
     if message.text == "❌ Bekor qilish":
         await state.clear()
-        await message.answer("❌ Bekor qilindi.", reply_markup=main_menu_kb())
+        await message.answer("❌ Buyurtma bekor qilindi.", reply_markup=main_menu_kb())
         return
 
     await state.update_data(address=message.text.strip())
     await state.set_state(Checkout.note)
     await message.answer(
-        "3️⃣ Qo'shimcha izoh (ixtiyoriy):\n"
-        "<i>Maxsus xohish, rang, model va h.k yoki «Yo'q» deb yozing</i>",
+        "📦 <b>Buyurtmani rasmiylashtirish (3/3-bosqich)</b>\n\n"
+        "📝 Buyurtma uchun qo'shimcha izoh yoki kuryer uchun maxsus eslatmalaringiz bormi? (Misol: model, rang yoki yetkazib berish vaqti)\n"
+        "<i>(Agar izoh bo'lmasa, «Yo'q» deb yozishingiz mumkin)</i>",
         reply_markup=cancel_kb(),
         parse_mode="HTML",
     )
@@ -307,14 +309,14 @@ async def checkout_address(message: Message, state: FSMContext):
 
 @router.message(Checkout.address)
 async def checkout_address_invalid(message: Message):
-    await message.answer("❌ Iltimos, manzilni matn ko'rinishida yozing!")
+    await message.answer("⚠️ Iltimos, yetkazib berish manzilingizni matn ko'rinishida yozib yuboring!")
 
 
 @router.message(Checkout.note, F.text)
 async def checkout_note(message: Message, state: FSMContext):
     if message.text == "❌ Bekor qilish":
         await state.clear()
-        await message.answer("❌ Bekor qilindi.", reply_markup=main_menu_kb())
+        await message.answer("❌ Buyurtma bekor qilindi.", reply_markup=main_menu_kb())
         return
 
 
@@ -332,18 +334,19 @@ async def checkout_note(message: Message, state: FSMContext):
     )
 
     await message.answer(
-        f"📋 <b>Buyurtmangizni tasdiqlang:</b>\n\n"
-        f"🛍 <b>Mahsulotlar:</b>\n{items_text}\n\n"
-        f"💰 <b>Jami: {fmt_price(total)} so'm</b>\n\n"
-        f"📱 Telefon: <b>{data['phone']}</b>\n"
-        f"📍 Manzil: <b>{data['address']}</b>\n"
+        f"📋 <b>Buyurtmangiz tafsilotlari:</b>\n\n"
+        f"Iltimos, barcha ma'lumotlar to'g'riligini tekshiring va tasdiqlang:\n\n"
+        f"🛍 <b>Mahsulotlar ro'yxati:</b>\n{items_text}\n\n"
+        f"💰 <b>Jami summa: {fmt_price(total)} so'm</b>\n\n"
+        f"📱 Telefon raqam: <b>{data['phone']}</b>\n"
+        f"📍 Yetkazib berish manzili: <b>{data['address']}</b>\n"
         + (f"📝 Izoh: <b>{note}</b>\n" if note else ""),
         reply_markup=checkout_confirm_kb(),
         parse_mode="HTML",
     )
 @router.message(Checkout.note)
 async def checkout_note_invalid(message: Message):
-    await message.answer("❌ Iltimos, izohni matn ko'rinishida yozing!")
+    await message.answer("⚠️ Iltimos, buyurtma izohini matn ko'rinishida yozib yuboring!")
 
 
 
@@ -381,15 +384,15 @@ async def order_confirm(callback: CallbackQuery, state: FSMContext):
     await send_sticker(bot, callback.message.chat.id, "success")
     await send_with_effect(
         bot, callback.message.chat.id,
-        f"🎉 <b>Buyurtmangiz qabul qilindi!</b>\n\n"
+        f"🎉 <b>Buyurtmangiz muvaffaqiyatli qabul qilindi!</b>\n\n"
         f"📋 Buyurtma raqami: <b>#{order_id}</b>\n\n"
-        f"⏳ Tez orada admin siz bilan bog'lanadi.\n"
-        f"📦 Buyurtma holati: <b>Kutmoqda</b>\n\n"
-        f"To'lov usulini tanlang:",
+        f"⏳ Buyurtmangiz rasmiylashtirildi. Tez orada menejerimiz siz bilan bog'lanadi!\n"
+        f"📦 Buyurtma holati: <b>Kutish jarayonida</b>\n\n"
+        f"💳 To'lovni amalga oshirish uchun o'zingizga qulay to'lov usulini tanlang:",
         effect_key="fireworks",
         reply_markup=payment_kb(order_id),
     )
-    await callback.answer("✅ Buyurtma qabul qilindi!")
+    await callback.answer("🎉 Buyurtmangiz qabul qilindi!")
 
     # Notify admins
     order, items = await db.get_order(order_id)
@@ -417,7 +420,7 @@ async def order_confirm(callback: CallbackQuery, state: FSMContext):
 async def order_cancel(callback: CallbackQuery, state: FSMContext):
     await state.clear()
     await callback.message.delete()
-    await callback.message.answer("❌ Buyurtma bekor qilindi.", reply_markup=main_menu_kb())
+    await callback.message.answer("❌ Buyurtmangiz bekor qilindi. Bosh menyuga qaytishingiz mumkin.", reply_markup=main_menu_kb())
     await callback.answer()
 
 
@@ -504,8 +507,8 @@ async def on_successful_payment(message: Message):
         await db.update_order_status(order_id, "processing")
         
         await message.answer(
-            f"🎉 <b>To'lov muvaffaqiyatli amalga oshirildi!</b>\n\n"
-            f"Sizning buyurtmangiz #{order_id} <b>Jarayonda</b> holatiga o'tkazildi. Tez orada kuryer bog'lanadi.",
+            f"🎉 <b>To'lovingiz muvaffaqiyatli qabul qilindi!</b>\n\n"
+            f"Sizning #{order_id}-sonli buyurtmangiz tasdiqlanib, <b>«Jarayonda»</b> holatiga o'tkazildi. Tez orada kuryerimiz siz bilan bog'lanadi va buyurtmangizni tezda yetkazadi. Xaridingiz uchun katta rahmat! 😊",
             parse_mode="HTML",
             reply_markup=main_menu_kb()
         )
@@ -524,15 +527,15 @@ async def on_successful_payment(message: Message):
             except Exception:
                 pass
     except Exception as e:
-        await message.answer(f"⚠️ To'lov hisobga olindi, ammo holatni yangilashda xatolik yuz berdi: {e}")
+        await message.answer(f"⚠️ To'lov amalga oshdi, lekin buyurtma holatini yangilashda texnik xatolik yuz berdi: {e}. Iltimos, administrator bilan bog'laning.")
 
 
 @router.callback_query(F.data.startswith("pay_cash:"))
 async def pay_cash(callback: CallbackQuery):
-    await callback.answer("✅ Naqd to'lash tanlandi. Yetkazib beruvchi siz bilan bog'lanadi.", show_alert=True)
+    await callback.answer("✅ Naqd to'lov usuli tanlandi.", show_alert=True)
     await callback.message.edit_reply_markup(reply_markup=None)
     await callback.message.answer(
-        "💵 <b>Naqd to'lash</b>\n\nYetkazib beruvchi siz bilan bog'langanda to'lashingiz mumkin. Rahmat!",
+        "💵 <b>Naqd to'lov usuli tanlandi</b>\n\nBuyurtmangiz rasmiylashtirildi. To'lovni mahsulotni yetkazib bergan kuryerga amalga oshirishingiz mumkin. Xaridingiz uchun tashakkur! 🤝",
         reply_markup=main_menu_kb(),
         parse_mode="HTML",
     )

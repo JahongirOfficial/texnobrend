@@ -20,7 +20,7 @@ async def menu_orders(message: Message):
     orders = await db.get_user_orders(message.from_user.id)
     if not orders:
         await message.answer(
-            "📋 <b>Buyurtmalar</b>\n\nSizda hali buyurtma yo'q.",
+            "📋 <b>Sizning buyurtmalaringiz tarixi</b>\n\nSiz hali birorta ham buyurtma bermagansiz. Mahsulotlar katalogiga o'tib, o'zingizga yoqqan mahsulotni tanlashingiz va buyurtma qilishingiz mumkin.",
             reply_markup=orders_kb(),
             parse_mode="HTML",
         )
@@ -42,7 +42,7 @@ async def menu_orders(message: Message):
     builder.row(InlineKeyboardButton(text="🏠 Bosh menyu", callback_data="main_menu"))
 
     await message.answer(
-        f"📋 <b>Buyurtmalarim</b> ({len(orders)} ta):",
+        f"📋 <b>Sizning buyurtmalaringiz ro'yxati</b> (jami {len(orders)} ta):",
         reply_markup=builder.as_markup(),
         parse_mode="HTML",
     )
@@ -53,7 +53,7 @@ async def cb_my_orders(callback: CallbackQuery):
     orders = await db.get_user_orders(callback.from_user.id)
     if not orders:
         await callback.message.edit_text(
-            "📋 <b>Buyurtmalar</b>\n\nSizda hali buyurtma yo'q.",
+            "📋 <b>Sizning buyurtmalaringiz tarixi</b>\n\nSiz hali birorta ham buyurtma bermagansiz. Mahsulotlar katalogiga o'tib, o'zingizga yoqqan mahsulotni tanlashingiz va buyurtma qilishingiz mumkin.",
             reply_markup=orders_kb(),
             parse_mode="HTML",
         )

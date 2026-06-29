@@ -49,9 +49,9 @@ async def cmd_start(message: Message, state: FSMContext):
     bot = message.bot
     if not await is_subscribed(bot, user.id):
         await message.answer(
-            f"👋 Salom, <b>{user.first_name}</b>!\n\n"
-            f"⚠️ <b>{SHOP_NAME}</b> botidan foydalanish uchun "
-            f"quyidagi kanallarga obuna bo'ling:",
+            f"👋 Assalomu alaykum, <b>{user.first_name}</b>!\n\n"
+            f"⚠️ Xizmatlarimizdan to'liq foydalanish uchun, iltimos, "
+            f"quyidagi rasmiy kanallarimizga a'zo bo'ling:",
             reply_markup=subscription_kb(),
             parse_mode="HTML",
         )
@@ -60,11 +60,10 @@ async def cmd_start(message: Message, state: FSMContext):
     await send_sticker(bot, message.chat.id, "welcome")
     await send_with_effect(
         bot, message.chat.id,
-        f"👋 Salom, <b>{user.first_name}</b>!\n\n"
-        f"🏪 <b>{SHOP_NAME}</b> botiga xush kelibsiz!\n\n"
-        f"📱 Bizda eng yangi va sifatli texnologik mahsulotlar mavjud.\n"
-        f"Qulay narxlar, tez yetkazib berish, kafolat!\n\n"
-        f"👇 Quyidagi menyudan tanlang:",
+        f"👋 Assalomu alaykum, hurmatli <b>{user.first_name}</b>!\n\n"
+        f"🏪 <b>{SHOP_NAME}</b> internet-do'konimizga xush kelibsiz! 😊\n\n"
+        f"📱 Bu yerda eng yangi va original gadjetlarni eng qulay narxlarda topishingiz mumkin. Rasmiy kafolat va tezkor yetkazib berish bilan xizmatingizdamiz!\n\n"
+        f"Xarid qilishni boshlash uchun quyidagi menyudan foydalaning: 👇",
         effect_key="confetti",
         reply_markup=main_menu_kb(),
     )
@@ -84,15 +83,15 @@ async def check_sub(callback: CallbackQuery):
         await send_sticker(bot, callback.message.chat.id, "welcome")
         await send_with_effect(
             bot, callback.message.chat.id,
-            f"✅ <b>Obuna tasdiqlandi!</b>\n\n"
-            f"👋 Salom, <b>{user.first_name}</b>!\n"
-            f"🏪 <b>{SHOP_NAME}</b> botiga xush kelibsiz!",
+            f"🎉 <b>Obuna muvaffaqiyatli tasdiqlandi!</b>\n\n"
+            f"👋 Assalomu alaykum, hurmatli <b>{user.first_name}</b>!\n"
+            f"🏪 <b>{SHOP_NAME}</b> do'konimizga xush kelibsiz! Marhamat, quyidagi menyudan foydalaning:",
             effect_key="confetti",
             reply_markup=main_menu_kb(),
         )
     else:
         await callback.answer(
-            "❌ Hali barcha kanallarga obuna bo'lmadingiz!", show_alert=True
+            "⚠️ Kechirasiz, hali barcha kanallarga obuna bo'lmadingiz. Iltimos, obunani tekshirib qayta urining!", show_alert=True
         )
 
 
@@ -136,11 +135,12 @@ async def menu_support(message: Message):
     builder.row(InlineKeyboardButton(text="🏠 Bosh menyu", callback_data="main_menu"))
 
     await message.answer(
-        f"🆘 <b>Yordam va qo'llab-quvvatlash</b>\n\n"
-        f"📞 Telefon: <b>{CONTACT_PHONE}</b>\n"
-        f"💬 Telegram: <b>{CONTACT_USERNAME}</b>\n\n"
-        f"🕐 Ish vaqti: Du-Sha, 09:00 — 20:00\n\n"
-        f"Savollaringiz bo'lsa, quyidagi tugma orqali admin bilan bog'laning:",
+        f"🆘 <b>Qo'llab-quvvatlash va Aloqa bo'limi</b>\n\n"
+        f"Hurmatli mijoz, agar sizda biror savol, taklif yoki texnik muammolar yuzaga kelgan bo'lsa, istalgan vaqtda bizga murojaat qilishingiz mumkin. Biz sizga yordam berishdan mamnunmiz!\n\n"
+        f"📞 <b>Aloqa telefoni:</b> {CONTACT_PHONE}\n"
+        f"💬 <b>Telegram profilimiz:</b> {CONTACT_USERNAME}\n\n"
+        f"🕐 <b>Ish vaqtimiz:</b> Dushanba – Yakshanba, 09:00 dan 20:00 gacha\n\n"
+        f"Pastdagi tugma orqali bevosita administratorimiz bilan tezkor bog'lanishingiz ham mumkin:",
         reply_markup=builder.as_markup(),
         parse_mode="HTML",
     )
@@ -166,9 +166,9 @@ async def menu_location(message: Message):
         url=f"https://maps.google.com/?q={loc['lat']},{loc['lon']}",
     ))
     await message.answer(
-        f"📍 <b>{loc['title']}</b>\n"
+        f"📍 <b>{loc['title']} do'konimiz manzili:</b>\n"
         f"📌 {loc['address']}\n\n"
-        f"🕐 Ish vaqti: Du-Sha, 09:00 — 20:00",
+        f"🕐 <b>Ish vaqtimiz:</b> Dushanba – Yakshanba, 09:00 dan 20:00 gacha. Tashrif buyurishingiz mumkin, sizni kutib qolamiz!",
         reply_markup=builder.as_markup(),
         parse_mode="HTML",
     )
@@ -181,9 +181,8 @@ async def menu_calculator(message: Message, state: FSMContext):
     await state.set_state(Calculator.price)
     from keyboards import cancel_kb
     await message.answer(
-        "🧮 <b>Narx kalkulyatori</b>\n\n"
-        "Mahsulot narxini kiriting (so'mda):\n"
-        "<i>Misol: 5990000</i>",
+        "🧮 <b>Muddatli to'lov kalkulyatori</b>\n\n"
+        "Iltimos, mahsulot narxini kiriting (masalan: <code>5990000</code>):",
         reply_markup=cancel_kb(),
         parse_mode="HTML",
     )
@@ -198,21 +197,21 @@ async def calc_price(message: Message, state: FSMContext):
 
     text = message.text.replace(" ", "").replace(",", "")
     if not text.isdigit():
-        await message.answer("❌ Raqam kiriting! Misol: <code>5990000</code>", parse_mode="HTML")
+        await message.answer("⚠️ Iltimos, narxni faqat sonlarda kiriting (masalan: <code>5990000</code>):", parse_mode="HTML")
         return
 
     await state.update_data(price=int(text))
     from keyboards import cancel_kb
     await state.set_state(Calculator.quantity)
     await message.answer(
-        "📦 Nechta olmoqchisiz? (Miqdorni kiriting):",
+        "📦 Tanlangan mahsulotdan nechta xarid qilmoqchisiz? (Miqdorini yozing):",
         reply_markup=cancel_kb(),
     )
 
 
 @router.message(Calculator.price)
 async def calc_price_invalid(message: Message):
-    await message.answer("❌ Iltimos, narxni faqat son shaklida kiriting!")
+    await message.answer("⚠️ Iltimos, mahsulot narxini faqat sonlar bilan yozib yuboring!")
 
 
 @router.message(Calculator.quantity, F.text)
@@ -224,7 +223,7 @@ async def calc_quantity(message: Message, state: FSMContext):
 
     text = message.text.strip()
     if not text.isdigit() or int(text) < 1:
-        await message.answer("❌ Musbat son kiriting!")
+        await message.answer("⚠️ Iltimos, miqdorni 1 dan katta musbat son ko'rinishida kiriting!")
         return
 
     data = await state.get_data()
@@ -242,12 +241,12 @@ async def calc_quantity(message: Message, state: FSMContext):
 
     await state.clear()
     await message.answer(
-        f"🧮 <b>Hisob-kitob natijasi</b>\n\n"
-        f"💰 Narx: <b>{fmt(price)} so'm</b>\n"
-        f"📦 Miqdor: <b>{qty} ta</b>\n"
+        f"🧮 <b>Hisob-kitob natijasi:</b>\n\n"
+        f"💰 Mahsulot narxi: <b>{fmt(price)} so'm</b>\n"
+        f"📦 Miqdori: <b>{qty} ta</b>\n"
         f"━━━━━━━━━━━━━━\n"
-        f"💵 <b>Jami: {fmt(total)} so'm</b>\n\n"
-        f"📅 <b>Muddatli to'lov:</b>\n"
+        f"💵 <b>Jami summa: {fmt(total)} so'm</b>\n\n"
+        f"📅 <b>Bo'lib to'lash variantlari:</b>\n"
         f"  • 3 oyga: <b>{fmt(installment_3)} so'm/oy</b>\n"
         f"  • 6 oyga: <b>{fmt(installment_6)} so'm/oy</b>\n"
         f"  • 12 oyga: <b>{fmt(installment_12)} so'm/oy</b>",
@@ -258,7 +257,7 @@ async def calc_quantity(message: Message, state: FSMContext):
 
 @router.message(Calculator.quantity)
 async def calc_quantity_invalid(message: Message):
-    await message.answer("❌ Iltimos, miqdorni faqat son shaklida kiriting!")
+    await message.answer("⚠️ Iltimos, miqdorni faqat son ko'rinishida yozib yuboring!")
 
 
 
@@ -267,19 +266,20 @@ async def calc_quantity_invalid(message: Message):
 @router.message(F.text == "ℹ️ Bot haqida")
 async def menu_about(message: Message):
     await message.answer(
-        f"ℹ️ <b>{SHOP_NAME} haqida</b>\n\n"
-        f"🏪 Biz eng yangi va sifatli texnologik mahsulotlarni taqdim etamiz.\n\n"
-        f"📦 Mahsulotlar:\n"
-        f"  • Smartfonlar (Samsung, Apple, Xiaomi)\n"
-        f"  • Noutbuklar (Apple, Lenovo, ASUS)\n"
-        f"  • Televizorlar (Samsung, LG, Xiaomi)\n"
-        f"  • Maishiy texnika (Artel)\n"
-        f"  • Naushniklar va Smart soatlar\n\n"
-        f"✅ Kafolat: 1-2 yil\n"
-        f"🚀 Yetkazib berish: 1-3 kun\n"
-        f"💳 To'lov: Click, Payme, Naqd\n\n"
-        f"📞 {CONTACT_PHONE}\n"
-        f"💬 {CONTACT_USERNAME}",
+        f"ℹ️ <b>{SHOP_NAME} do'koni haqida</b>\n\n"
+        f"🏪 Biz eng so'nggi rusumdagi va 100% original texnologik mahsulotlarni taqdim etishdan faxrlanamiz. Do'konimiz orqali uyingizdan chiqmasdan turib xaridlarni amalga oshiring!\n\n"
+        f"📦 <b>Bizning mahsulotlarimiz:</b>\n"
+        f"  • Zamonaviy smartfonlar (Apple, Samsung, Xiaomi)\n"
+        f"  • Kuchli noutbuklar (Apple MacBook, Lenovo, ASUS)\n"
+        f"  • Katta ekranli televizorlar (Samsung, LG, Xiaomi)\n"
+        f"  • Ishonchli maishiy texnikalar (Artel va boshqalar)\n"
+        f"  • Sifatli naushniklar va smart-soatlar\n\n"
+        f"✅ <b>Afzalliklarimiz:</b>\n"
+        f"  🛡 1-2 yilgacha rasmiy kafolat\n"
+        f"  🚀 O'zbekiston bo'ylab tezkor yetkazib berish (1-3 kun)\n"
+        f"  💳 Click, Payme yoki eshik oldida naqd to'lash imkoniyati\n\n"
+        f"📞 Telefon: {CONTACT_PHONE}\n"
+        f"💬 Telegram: {CONTACT_USERNAME}",
         reply_markup=main_menu_kb(),
         parse_mode="HTML",
     )

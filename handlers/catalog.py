@@ -238,7 +238,7 @@ async def cb_opt_change(callback: CallbackQuery):
 async def menu_search(message: Message, state: FSMContext):
     await state.set_state(Search.query)
     await message.answer(
-        "🔍 <b>Qidirish</b>\n\nMahsulot nomini yozing:",
+        "🔍 <b>Mahsulot qidirish</b>\n\nQidirmoqchi bo'lgan mahsulotingiz nomini yoki modelini yozing:",
         reply_markup=cancel_kb(),
         parse_mode="HTML",
     )
@@ -248,7 +248,7 @@ async def menu_search(message: Message, state: FSMContext):
 async def cb_search(callback: CallbackQuery, state: FSMContext):
     await state.set_state(Search.query)
     await callback.message.answer(
-        "🔍 <b>Qidirish</b>\n\nMahsulot nomini yozing:",
+        "🔍 <b>Mahsulot qidirish</b>\n\nQidirmoqchi bo'lgan mahsulotingiz nomini yoki modelini yozing:",
         reply_markup=cancel_kb(),
         parse_mode="HTML",
     )
@@ -259,17 +259,17 @@ async def cb_search(callback: CallbackQuery, state: FSMContext):
 async def do_search(message: Message, state: FSMContext):
     if message.text == "❌ Bekor qilish":
         await state.clear()
-        await message.answer("❌ Bekor qilindi.", reply_markup=main_menu_kb())
+        await message.answer("❌ Qidiruv bekor qilindi.", reply_markup=main_menu_kb())
         return
 
 
     query = message.text.strip()
     if len(query) < 2:
-        await message.answer("⚠️ Kamida 2 ta harf kiriting!")
+        await message.answer("⚠️ Iltimos, qidiruv aniqroq bo'lishi uchun kamida 2 ta harf kiriting!")
         return
 
     # Show loading indicator
-    loading = await message.answer("🔍 Qidirilmoqda...")
+    loading = await message.answer("🔍 Mahsulotlar katalogidan qidirilmoqda, iltimos ozgina kuting...")
 
     results = await db.search_products(query, limit=5)
     await state.clear()
@@ -281,9 +281,9 @@ async def do_search(message: Message, state: FSMContext):
 
     if not results:
         await message.answer(
-            f"😔 <b>«{query}»</b> bo'yicha hech narsa topilmadi.\n\n"
-            "💡 Maslahat: brend yoki kategoriya nomini yozing\n"
-            "<i>Misol: Samsung, iPhone, muzlatgich, noutbuk…</i>",
+            f"😔 Afsuski, <b>«{query}»</b> so'rovi bo'yicha birorta ham mahsulot topilmadi.\n\n"
+            "💡 <b>Maslahat:</b> Brend yoki mahsulot turini yozib ko'ring.\n"
+            "<i>Masalan: Samsung, iPhone, noutbuk, televizor...</i>",
             reply_markup=main_menu_kb(),
             parse_mode="HTML",
         )
@@ -304,8 +304,8 @@ async def do_search(message: Message, state: FSMContext):
     )
 
     await message.answer(
-        f"🔍 <b>«{query}»</b> — eng mos {len(results)} ta natija:\n"
-        f"<i>Mahsulotga bosib batafsil ko'ring</i>",
+        f"🔍 <b>«{query}»</b> so'rovingiz bo'yicha topilgan natijalar (eng mos {len(results)} ta):\n\n"
+        f"👇 Tafsilotlarni ko'rish uchun kerakli mahsulot ustiga bosing:",
         reply_markup=builder.as_markup(),
         parse_mode="HTML",
     )
@@ -313,5 +313,5 @@ async def do_search(message: Message, state: FSMContext):
 
 @router.message(Search.query)
 async def do_search_invalid(message: Message):
-    await message.answer("❌ Iltimos, mahsulot nomini matn ko'rinishida yozing!")
+    await message.answer("⚠️ Iltimos, qidirmoqchi bo'lgan mahsulot nomini matn ko'rinishida yozib yuboring!")
 
